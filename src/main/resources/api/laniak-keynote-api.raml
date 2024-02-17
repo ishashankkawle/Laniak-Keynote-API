@@ -1,0 +1,91 @@
+#%RAML 1.0
+title: laniak-keynote-api
+
+/contents:
+  get:
+    description: This endpoint is used to get list of files & folders.
+    queryParameters:
+      path: 
+        type: string
+        required: false
+        description: This will be url encoded ( / = %2F )
+
+/file:
+  get:
+    description: This is used to get file contents
+    queryParameters:
+      path:
+        type: string
+        required: true
+        description: This will be url encoded ( / = %2F )
+  
+  post:
+    description: This is used to create new file
+    body:
+      application/json:
+        examples:
+          input: {
+            "filePath" : "abc%2Ffile.md",
+            "content" : "lorem ipsum fa fred uno",
+            "commitMessage" : "Create new file"
+          }
+    responses:
+      201:
+        body:
+          application/json:
+            examples:
+              output: {"message" : "File created successfully"}
+  put:
+    description: This is used to update file contents
+    body:
+      application/json:
+        examples:
+          input: {
+            "filePath" : "abc%2Ffile.md",
+            "content" : "lorem ipsum fa fred uno",
+            "commitMessage" : "Create new file"
+          }
+
+/folder:
+  post:
+    description: This is used to create new folder
+    body:
+      application/json:
+        examples:
+          input: {
+            "filePath" : "abc%2Fnewfolder",
+            "commitMessage" : "Create new folder"
+          }
+
+/blob:
+  get:
+    description: Generate public url of image
+    queryParameters:
+      path:
+        description: This will NOT be url encoded ( / = %2F )
+        type: string
+        required: true
+    responses:
+      200:
+        body:
+          application/json:
+            examples:
+              output:
+                {"url" : "https://gitlab.com/shashankkawle/DOCS/-/blob/master/folderpath/filename.png"}
+
+  post:
+    description: Upload image
+    body:
+      application/json:
+        examples:
+          input: {
+            "filePath" : "abc%2Fa.png",
+            "content" : "Base64 encoded string without 'data:image/png;base64,' part",
+            "commitMessage" : "Uploaded a.png"
+          }
+    responses:
+      201:
+        body:
+          application/json:
+            examples:
+              output: {"message" : "File uploaded successfully"}

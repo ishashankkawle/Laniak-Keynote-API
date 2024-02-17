@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="getContentsMain" doc:id="742ffea3-f66f-4f43-9145-2296a4207457" >
+		<choice doc:name="Choice" doc:id="2b4a1c3e-f0bc-4bcc-a956-d918f53d5d2c" >
+			<when expression="#[!(attributes.queryParams.path?)]">
+				<http:request method="GET" doc:name="Request" doc:id="94372f66-9e61-443a-973a-7faf9974913f" config-ref="Gitlab_Request_configuration" path="/repository/tree">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM"
+}]]]></http:headers>
+				</http:request>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="5465416d-8dfd-47e3-8962-8ccb3533d5d8">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::URL 
+output application/java
+---
+{
+	path : "/repository/tree?path=" ++ encodeURIComponent(attributes.queryParams.path)
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<http:request method="GET" doc:name="Request" doc:id="7d717535-94b4-40bd-979a-3a11772a7966" config-ref="Gitlab_Request_configuration" path="#[payload.path]">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM"
+}]]]></http:headers>
+				</http:request>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="ce8a8f33-825a-451b-8b38-f69bea667b8b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getFileContentsMain" doc:id="55fb4cb9-2914-46f9-a70d-73fd0bf9955b" >
+		<ee:transform doc:name="Transform Message" doc:id="d2b035de-aa65-42fc-a126-39cbbe9ee3cf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0 
+import * from dw::core::URL 
+output application/json 
+---
+{
+	url : "/repository/files/" ++ encodeURIComponent(attributes.queryParams.path) ++ "/raw"
+
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="2ac3649e-1c3d-45d0-a992-b59996773114" config-ref="Gitlab_Request_configuration" path='#[payload.url]'>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"ref" : "master"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="1bb726c0-1e9d-4cbe-aaaf-35e4d6adc25d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="createNewFileMain" doc:id="ac67d9ab-c5b5-4a89-b45e-8a8f29b85192" >
+		<ee:transform doc:name="Transform Message" doc:id="54cf7f18-9795-448e-b50b-59a2af91adb4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	content : payload.content,
+	commit_message : payload.commitMessage
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="backup_payload" ><![CDATA[%dw 2.0
+import * from dw::core::URL 
+output application/json
+---
+{
+    "filePath" : encodeURIComponent(payload.filePath),
+    "content" : payload.content,
+    "commitMessage" : payload.commitMessage
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request" doc:id="79fb5083-eb97-43f9-9627-1ed7b6645f59" config-ref="Gitlab_Request_configuration" path='#["/repository/files/" ++ vars.backup_payload.filePath]'>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"branch" : "master"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="17cd2943-235f-4be3-8c78-8284ad9707b2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="createNewFolderMain" doc:id="ef54a7ab-b12e-4d68-ab86-c9a435c1f8ac" >
+		<ee:transform doc:name="Transform Message" doc:id="b6b7cbbd-6dfc-40e3-aba3-20894135d12f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	content : "Welcome to Keynotes",
+	commit_message : payload.commitMessage
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="backup_payload" ><![CDATA[%dw 2.0
+import * from dw::core::URL 
+output application/json
+---
+{
+    "filePath" : encodeURIComponent(payload.filePath),
+    "commitMessage" : payload.commitMessage
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request" doc:id="5135d607-3def-4ad2-8890-32a748997862" config-ref="Gitlab_Request_configuration" path='#["/repository/files/" ++ vars.backup_payload.filePath ++ "%2FReadMe.md"]' >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"branch" : "master"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="67ac95ef-e624-4a61-9976-b66aa5bed150" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="updateFileMain" doc:id="840e4642-4472-4ae6-bf7c-ac535b5eadd2" >
+		<ee:transform doc:name="Transform Message" doc:id="9683da5b-efe0-4175-aad2-b9c0245f884b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	content : payload.content,
+	commit_message : payload.commitMessage
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="backup_payload" ><![CDATA[%dw 2.0
+import * from dw::core::URL 
+output application/json
+---
+{
+    "filePath" : encodeURIComponent(payload.filePath),
+    "content" : payload.content,
+    "commitMessage" : payload.commitMessage
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="PUT" doc:name="Request" doc:id="bb26239d-8254-4c04-8b97-ccdeef64fb06" config-ref="Gitlab_Request_configuration" path='#["/repository/files/" ++ vars.backup_payload.filePath]' >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"branch" : "master"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="c9374eaf-9489-43d1-9ab7-90ee70b3ab1d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="uploadBlobMain" doc:id="79892a48-1c08-4bb8-856e-29966b5e4207" >
+		<ee:transform doc:name="Transform Message" doc:id="2b86e9de-d439-49e6-92a7-9cc56a62376c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	content : payload.content,
+	commit_message : payload.commitMessage
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="backup_payload" ><![CDATA[%dw 2.0
+import * from dw::core::URL 
+output application/json
+---
+{
+    "filePath" : encodeURIComponent(payload.filePath),
+    "content" : payload.content,
+    "commitMessage" : payload.commitMessage
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request" doc:id="4e043762-9b3e-4784-962e-925fed0f6bfb" config-ref="Gitlab_Request_configuration" path='#["/repository/files/" ++ vars.backup_payload.filePath]' >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"branch" : "master",
+	"encoding" : "base64"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="37e75296-44c9-4d65-9e60-5628a0638e0b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getBlobLinkMain" doc:id="f4101acf-02dd-41be-93b5-73e7aeab2b08" >
+		<ee:transform doc:name="Transform Message" doc:id="4443ea84-0ce9-4c1b-a184-c672e1dfbf06" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	url : "https://gitlab.com/shashankkawle/DOCS/-/raw/master/" ++ attributes.queryParams.path
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
