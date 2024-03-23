@@ -2,7 +2,7 @@ import express from 'express'
 import { httpGet, httpPost, httpPut } from './core/httpHandler.js'
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000;
 const gitlabBaseUrl = "https://gitlab.com/api/v4/projects/8300723"
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 
