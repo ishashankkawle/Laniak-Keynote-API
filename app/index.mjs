@@ -1,5 +1,6 @@
 import express from 'express'
 import { httpGet, httpPost, httpPut } from './core/httpHandler.js'
+import {pool} from './initializers/databasePoolInitializer.js'
 
 const app = express()
 const port = process.env.PORT || 3000;
@@ -17,7 +18,6 @@ app.listen(port, () => {
 // MIDDLEWARES
 //--------------------------------------------------------------------
 app.use(express.json())
-
 
 
 //--------------------------------------------------------------------
@@ -146,6 +146,12 @@ app.post('/catalog' , async(req ,res) =>
   res.send(await httpPost(gitlabBaseUrl + "/repository/files/_DIR_FILES%2F"  + encodeURIComponent(req.body.name) + "%2F" + encodeURIComponent(req.body.fileName) + "?branch=master&encoding=base64", body2 , customHeader))
 })
 
+
+app.get('/gallary' , async(req , res) => 
+{
+  let data = await pool.query("select	* from article_master order by dateupdated desc")
+  return res.status(200).json(data.rows)
+})
 
 
 //--------------------------------------------------------------------
