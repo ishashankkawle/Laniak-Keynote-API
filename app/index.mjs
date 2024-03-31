@@ -1,11 +1,12 @@
 import express from 'express'
-import { httpGet, httpPost, httpPut } from './core/httpHandler.js'
-import {pool} from './initializers/databasePoolInitializer.js'
+import AppInstance from './initializers/appInstanceInitializer.mjs'
 
 const app = express()
 const port = process.env.PORT || 3000;
-const gitlabBaseUrl = "https://gitlab.com/api/v4/projects/8300723"
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+
+const appInstance = new AppInstance()
+const gitlabBaseUrl = appInstance.resources.gitlabBaseUrl;
 
 //--------------------------------------------------------------------
 // INITIALIZATION
@@ -36,12 +37,12 @@ app.use(function(req, res, next) {
 //--------------------------------------------------------------------
 // MAIN ROUTES
 //--------------------------------------------------------------------
-app.get('/contents', async (req, res) => 
+app.get('/docs/contents', async (req, res) => 
 {
   let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
   if(req.query.path)
   {
-    res.send(await httpGet(gitlabBaseUrl + "/repository/tree?path=" + encodeURIComponent(req.query.path) , customHeader))
+    res.send(await appInstance.http.httpGet(gitlabBaseUrl + "/repository/tree?path=" + encodeURIComponent(req.query.path) , customHeader))
   }
   else
   {
@@ -49,31 +50,31 @@ app.get('/contents', async (req, res) =>
   }
 })
 
-app.get('/all', async (req, res) => 
+app.get('/docs/all', async (req, res) => 
 {
   let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
   if(req.query.path)
   {
-    res.send(await httpGet(gitlabBaseUrl + "/repository/tree?path=" + encodeURIComponent(req.query.path) + "&recursive=true" , customHeader))
+    res.send(await appInstance.http.httpGet(gitlabBaseUrl + "/repository/tree?path=" + encodeURIComponent(req.query.path) + "&recursive=true" , customHeader))
   }
   else
   {
-    res.send(await httpGet(gitlabBaseUrl + "/repository/tree?recursive=true" , customHeader))
+    res.send(await appInstance.http.httpGet(gitlabBaseUrl + "/repository/tree?recursive=true" , customHeader))
   }
 })
 
-app.get('/file', async (req, res) => 
+app.get('/docs/file', async (req, res) => 
 {
   let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
-  res.send(await httpGet(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.query.path) + "/raw" , customHeader))
+  res.send(await appInstance.http.httpGet(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.query.path) + "/raw" , customHeader))
 })
 
-app.get('/blob', async (req, res) => 
+app.get('/docs/blob', async (req, res) => 
 {
-  res.send({url : "https://gitlab.com/shashankkawle/DOCS/-/raw/master/" + req.query.path})
+  res.send({url : "https://gitlab.com/shashankkawle/DOCS/-/raw/master/_ASSETS/" + req.query.path})
 })
 
-app.post('/file', async (req, res) => 
+app.post('/docs/file', async (req, res) => 
 {
   let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
   let body = {
@@ -83,10 +84,10 @@ app.post('/file', async (req, res) =>
     "author_email" : req.body.authorEmail
   }
 
-  res.send(await httpPost(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.body.filePath) + "?branch=master" , body , customHeader))
+  res.send(await appInstance.http.httpPost(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.body.filePath) + "?branch=master" , body , customHeader))
 })
 
-app.put('/file', async (req, res) => 
+app.put('/docs/file', async (req, res) => 
 {
   let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
   let body = {
@@ -96,10 +97,10 @@ app.put('/file', async (req, res) =>
     "author_email" : req.body.authorEmail
   }
   
-  res.send(await httpPut(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.body.filePath) + "?branch=master" , body , customHeader))
+  res.send(await appInstance.http.httpPut(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.body.filePath) + "?branch=master" , body , customHeader))
 })
 
-app.post('/folder', async (req, res) => 
+app.post('/docs/folder', async (req, res) => 
 {
   let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
   let body = {
@@ -109,10 +110,10 @@ app.post('/folder', async (req, res) =>
     "author_email" : req.body.authorEmail
   }
 
-  res.send(await httpPost(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.body.filePath) + "%2FReadMe.md?branch=master" , body , customHeader))
+  res.send(await appInstance.http.httpPost(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.body.filePath) + "%2FReadMe.md?branch=master" , body , customHeader))
 })
 
-app.post('/blob', async (req, res) => 
+app.post('/docs/blob', async (req, res) => 
 {
   let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close" }
   let body = {
@@ -122,10 +123,10 @@ app.post('/blob', async (req, res) =>
     "author_email" : req.body.authorEmail
   }
 
-  res.send(await httpPost(gitlabBaseUrl + "/repository/files/_ASSETS%2F" + encodeURIComponent(req.body.filePath) + "?branch=master&encoding=base64", body , customHeader))
+  res.send(await appInstance.http.httpPost(gitlabBaseUrl + "/repository/files/_ASSETS%2F" + encodeURIComponent(req.body.filePath) + "?branch=master&encoding=base64", body , customHeader))
 })
 
-app.post('/catalog' , async(req ,res) => 
+app.post('/docs/catalog' , async(req ,res) => 
 {
   let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
   let body = {
@@ -141,16 +142,21 @@ app.post('/catalog' , async(req ,res) =>
     "author_email" : req.body.authorEmail
   }
 
-  let output = await httpPost(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.body.name) + "%2FReadMe.md?branch=master" , body , customHeader)
+  let output = await appInstance.http.httpPost(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.body.name) + "%2FReadMe.md?branch=master" , body , customHeader)
   console.log(output)
-  res.send(await httpPost(gitlabBaseUrl + "/repository/files/_DIR_FILES%2F"  + encodeURIComponent(req.body.name) + "%2F" + encodeURIComponent(req.body.fileName) + "?branch=master&encoding=base64", body2 , customHeader))
+  res.send(await appInstance.http.httpPost(gitlabBaseUrl + "/repository/files/_DIR_FILES%2F"  + encodeURIComponent(req.body.name) + "%2F" + encodeURIComponent(req.body.fileName) + "?branch=master&encoding=base64", body2 , customHeader))
 })
 
-
-app.get('/gallary' , async(req , res) => 
+app.get('/article/gallary' , async(req , res) => 
 {
-  let data = await pool.query("select	* from article_master order by dateupdated desc")
+  let data = await appInstance.pool.query("select	* from article_master order by dateupdated desc")
   return res.status(200).json(data.rows)
+})
+
+app.post('/article' , async (req, res) => 
+{ 
+  let data = await appInstance.article.createNewArticle(req);
+  res.send(data);
 })
 
 
