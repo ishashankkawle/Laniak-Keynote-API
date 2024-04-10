@@ -159,6 +159,18 @@ app.post('/article' , async (req, res) =>
   res.send(data);
 })
 
+app.get('/article/summary' , async(req , res) => 
+{
+  let data = await appInstance.pool.query("select	* from article_master where id = $1" , [req.query.id] )
+  return res.status(200).json(data.rows[0])
+})
+
+app.put('/article/likes' , async(req , res) => 
+{
+  let data = await appInstance.pool.query("update article_master set likes = ((select likes from article_master where id = $1) :: numeric  + 1) :: text  where id = $1 RETURNING *;" , [req.body.id] )
+  return res.status(200).json(data.rows[0])
+})
+
 
 //--------------------------------------------------------------------
 // POST REQUEST MIDDLEWARES
