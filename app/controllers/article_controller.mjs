@@ -4,7 +4,7 @@ import AppInstance from "../initializers/appInstanceInitializer.mjs";
 class ArticleController {
     constructor()
     {
-        this.appInstance = new AppInstance(); 
+        this.appInstance = new AppInstance();  
     }
 
     async createNewArticle(req)
@@ -25,9 +25,32 @@ class ArticleController {
             "author_name" : authorName,
             "author_email" : authorEmail
         }
-        const filePath = "_ARTICLES/" + name
+        const filePath = this.appInstance.resources.articleRootFolder + "/" + name
 
         return await this.appInstance.http.httpPost(this.appInstance.resources.gitlabBaseUrl + "/repository/files/" + encodeURIComponent(filePath) + "?branch=master" , body , customHeader)
+    };
+
+
+    async deleteArticle(req)
+    {
+       
+        const { name, commitMessage , authorName , authorEmail } = req.body
+        await this.appInstance.pool.query("Delete from article_master where name = $1 RETURNING *" , [name] , (error) => {
+            if (error) {
+            throw error
+            }
+        });
+
+        const filePath = this.appInstance.resources.articleRootFolder + "/" + name
+    
+        let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
+        let body = {
+            "commit_message" : commitMessage,
+            "author_name" : authorName,
+            "author_email" : authorEmail
+        }
+        return await this.appInstance.http.httpDelete(this.appInstance.resources.gitlabBaseUrl + "/repository/files/" + encodeURIComponent(filePath) + "?branch=master" , body , customHeader)
+    
     };
 }
 
