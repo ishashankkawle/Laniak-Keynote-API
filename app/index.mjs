@@ -38,10 +38,14 @@ app.use(function (req, res, next) {
 // MAIN ROUTES
 //--------------------------------------------------------------------
 app.get('/health', async (req, res) => {
-  try {
-    res.send({ "status": "Online" })
+  try 
+  {
+    await appInstance.pool.query("select	count(0) from article_master")
+    res.send({ "status": "Online" , "Database" : "Online"})
   }
-  catch (e) { }
+  catch (e) { 
+    res.send({ "status": "Online" , "Database" : "Offline" })
+  }
 })
 
 app.get('/docs/contents', async (req, res) => {
