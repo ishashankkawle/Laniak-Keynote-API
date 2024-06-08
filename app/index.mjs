@@ -231,6 +231,16 @@ app.put('/articles/likes', async (req, res) => {
   }
 })
 
+app.get('/articles/file', async (req, res) => {
+  try {
+    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    const filePath = appInstance.resources.articleRootFolder + "/" + req.query.path
+    res.send(await appInstance.http.httpGet(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(filePath) + "/raw", customHeader))
+  } catch (error) {
+    console.log(error)
+  }
+})
+
 app.put('/articles/file', async (req, res) => {
   try {
 
