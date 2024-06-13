@@ -197,7 +197,7 @@ app.delete('/docs/file', async (req, res) => {
 
 app.get('/articles/gallary', async (req, res) => {
   try {
-    let data = await appInstance.pool.query("select	* from article_master order by dateupdated desc")
+    let data = await appInstance.pool.query("select	* from article_master order by TO_DATE(datecreated , 'DD-MM-YYYY') desc")
     return res.status(200).json(data.rows)
   } catch (error) {
     console.log(error)
