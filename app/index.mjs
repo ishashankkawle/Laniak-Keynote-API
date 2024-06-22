@@ -87,7 +87,7 @@ app.get('/docs/file', async (req, res) => {
 
 app.get('/docs/blob', async (req, res) => {
   try {
-    res.send({ url: "https://gitlab.com/shashankkawle/DOCS/-/raw/master/_ASSETS/" + req.query.path })
+    res.send({ url: "https://gitlab.com/shashankkawle/DOCS/-/raw/master/_ASSETS/" + encodeURIComponent(req.query.path) })
   } catch (error) {
     console.log(error)
   }
