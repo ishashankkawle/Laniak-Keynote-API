@@ -1,4 +1,3 @@
-import "./envInitializer.mjs"
 import { resources } from "../public/resources.mjs";
 import ArticleController from "../controllers/article_controller.mjs";
 import httpHandler from "../core/httpHandler.mjs";
