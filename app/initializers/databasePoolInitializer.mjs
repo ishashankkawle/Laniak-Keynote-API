@@ -1,6 +1,6 @@
 import pg from 'pg';
 
-
+console.log("Password : " + process.env.DB_PASSWORD)
 const pool = new pg.Pool({
     user: 'postgres.kpdbetuawspoaqfusuib',
     host: 'aws-0-ap-southeast-1.pooler.supabase.com',
