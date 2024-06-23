@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.mjs",
   "scripts": {
-    "start": "node --env-file=.env app/index.mjs",
+    "start": "node app/index.mjs",
     "test": "echo \"Error: no test specified\" "
   },
   "author": "",
