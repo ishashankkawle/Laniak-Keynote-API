@@ -1,7 +1,6 @@
 import Util from "../core/util.mjs";
 import AppInstance from "../initializers/appInstanceInitializer.mjs";
-import dotenv from 'dotenv'
-dotenv.config()
+
 
 class ArticleController {
     constructor()

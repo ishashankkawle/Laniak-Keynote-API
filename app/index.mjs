@@ -1,7 +1,6 @@
 import express from 'express'
 import AppInstance from './initializers/appInstanceInitializer.mjs'
-import dotenv from 'dotenv'
-dotenv.config()
+
 
 const app = express()
 const port = process.env.PORT || 3000;
