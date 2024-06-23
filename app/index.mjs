@@ -1,5 +1,7 @@
 import express from 'express'
 import AppInstance from './initializers/appInstanceInitializer.mjs'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const app = express()
 const port = process.env.PORT || 3000;
@@ -50,7 +52,7 @@ app.get('/health', async (req, res) => {
 
 app.get('/docs/contents', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     if (req.query.path) {
       res.send(await appInstance.http.httpGet(gitlabBaseUrl + "/repository/tree?path=" + encodeURIComponent(req.query.path), customHeader))
     }
@@ -64,7 +66,7 @@ app.get('/docs/contents', async (req, res) => {
 
 app.get('/docs/all', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     if (req.query.path) {
       res.send(await appInstance.http.httpGet(gitlabBaseUrl + "/repository/tree?path=" + encodeURIComponent(req.query.path) + "&recursive=true", customHeader))
     }
@@ -78,7 +80,7 @@ app.get('/docs/all', async (req, res) => {
 
 app.get('/docs/file', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     res.send(await appInstance.http.httpGet(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(req.query.path) + "/raw", customHeader))
   } catch (error) {
     console.log(error)
@@ -87,7 +89,7 @@ app.get('/docs/file', async (req, res) => {
 
 app.get('/docs/blob', async (req, res) => {
   try {
-    res.send({ url: "https://gitlab.com/shashankkawle/DOCS/-/raw/master/_ASSETS/" + encodeURIComponent(req.query.path) })
+    res.send({ url: "https://gitlab.com/shashankkawle/DOCS/-/raw/master/_ASSETS/" + req.query.path })
   } catch (error) {
     console.log(error)
   }
@@ -95,7 +97,7 @@ app.get('/docs/blob', async (req, res) => {
 
 app.post('/docs/file', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     let body = {
       "content": req.body.content,
       "commit_message": req.body.commitMessage,
@@ -111,7 +113,7 @@ app.post('/docs/file', async (req, res) => {
 
 app.put('/docs/file', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     let body = {
       "content": req.body.content,
       "commit_message": req.body.commitMessage,
@@ -127,7 +129,7 @@ app.put('/docs/file', async (req, res) => {
 
 app.post('/docs/folder', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     let body = {
       "content": "Welcome to Keynotes",
       "commit_message": req.body.commitMessage,
@@ -143,7 +145,7 @@ app.post('/docs/folder', async (req, res) => {
 
 app.post('/docs/blob', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     let body = {
       "content": req.body.content,
       "commit_message": req.body.commitMessage,
@@ -159,7 +161,7 @@ app.post('/docs/blob', async (req, res) => {
 
 app.post('/docs/catalog', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     let body = {
       "content": "Welcome to Keynotes",
       "commit_message": req.body.commitMessage,
@@ -183,7 +185,7 @@ app.post('/docs/catalog', async (req, res) => {
 
 app.delete('/docs/file', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     let body = {
       "commit_message": req.body.commitMessage,
       "author_name": req.body.authorName,
@@ -233,7 +235,7 @@ app.put('/articles/likes', async (req, res) => {
 
 app.get('/articles/file', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     const filePath = appInstance.resources.articleRootFolder + "/" + req.query.path
     res.send(await appInstance.http.httpGet(gitlabBaseUrl + "/repository/files/" + encodeURIComponent(filePath) + "/raw", customHeader))
   } catch (error) {
@@ -244,7 +246,7 @@ app.get('/articles/file', async (req, res) => {
 app.put('/articles/file', async (req, res) => {
   try {
 
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     let body = {
       "content": req.body.content,
       "commit_message": req.body.commitMessage,
@@ -262,7 +264,7 @@ app.put('/articles/file', async (req, res) => {
 
 app.post('/articles/blob', async (req, res) => {
   try {
-    let customHeader = { "PRIVATE-TOKEN": "glpat-xG6KXqNybtRAVdhd1pyM", "Connection": "close" }
+    let customHeader = { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN, "Connection": "close" }
     let body = {
       "content": req.body.content,
       "commit_message": req.body.commitMessage,

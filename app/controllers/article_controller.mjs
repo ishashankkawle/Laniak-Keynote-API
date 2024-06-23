@@ -1,5 +1,7 @@
 import Util from "../core/util.mjs";
 import AppInstance from "../initializers/appInstanceInitializer.mjs";
+import dotenv from 'dotenv'
+dotenv.config()
 
 class ArticleController {
     constructor()
@@ -18,7 +20,7 @@ class ArticleController {
             }
         });
 
-        let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
+        let customHeader = { "PRIVATE-TOKEN" : process.env.GITLAB_TOKEN , "Connection" : "close"}
         let body = {
             "content" : content,
             "commit_message" : commitMessage,
@@ -43,7 +45,7 @@ class ArticleController {
 
         const filePath = this.appInstance.resources.articleRootFolder + "/" + name
     
-        let customHeader = { "PRIVATE-TOKEN" : "glpat-xG6KXqNybtRAVdhd1pyM" , "Connection" : "close"}
+        let customHeader = { "PRIVATE-TOKEN" : process.env.GITLAB_TOKEN , "Connection" : "close"}
         let body = {
             "commit_message" : commitMessage,
             "author_name" : authorName,
